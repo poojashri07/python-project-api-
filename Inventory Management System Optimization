@@ -1,0 +1,35 @@
+class Product:
+    def __init__(self, product_id, name):
+        self.product_id = product_id
+        self.name = name
+        self.stock_level = 0
+        self.reorder_point = 10 
+        self.reorder_quantity = 50  
+
+class Warehouse:
+    def __init__(self, warehouse_id, location):
+        self.warehouse_id = warehouse_id
+        self.location = location
+        self.products = {}  
+    def add_product(self, product, initial_stock=0):
+        self.products[product.product_id] = {'product': product, 'stock': initial_stock}
+    
+    def update_stock(self, product_id, quantity):
+        if product_id in self.products:
+            self.products[product_id]['stock'] += quantity
+        else:
+            print(f"Product with ID {product_id} not found in warehouse.")
+    
+    def get_stock_level(self, product_id):
+        if product_id in self.products:
+            return self.products[product_id]['stock']
+        else:
+            return None
+product1 = Product(1, "Laptop")
+product2 = Product(2, "Printer")
+
+warehouse1 = Warehouse(1, "Main Warehouse")
+warehouse1.add_product(product1, 50)
+warehouse1.add_product(product2, 20)
+
+print(f"Stock level of {product1.name} in {warehouse1.location}: {warehouse1.get_stock_level(product1.product_id)}")
