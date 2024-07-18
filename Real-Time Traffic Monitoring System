@@ -2,7 +2,7 @@ import requests
 import urllib.parse
 
 def fetch_traffic_data(api_key, origin_lat, origin_lon, dest_lat, dest_lon):
-    base_url = "https://developer.tomtom.com/user/me/apps"
+    base_url = "https://api.tomtom.com/traffic/services/4/route/traffic/json"
     params = {
         "key": api_key,
         "departureTime": "now",
