@@ -1,0 +1,74 @@
+import requests
+import urllib.parse
+
+def fetch_traffic_data(api_key, origin_lat, origin_lon, dest_lat, dest_lon):
+    base_url = "https://developer.tomtom.com/user/me/apps"
+    params = {
+        "key": api_key,
+        "departureTime": "now",
+        "traffic": "true",
+        "travelMode": "car",
+        "avoid": "unpavedRoads",
+        "language": "en",
+        "computeBestOrder": "true",
+        "sectionType": "traffic",
+        "routeType": "fastest",
+        "origin": f"{origin_lat},{origin_lon}",
+        "destination": f"{dest_lat},{dest_lon}"
+    }
+    
+    try:
+        encoded_params = urllib.parse.urlencode(params, quote_via=urllib.parse.quote)
+        url = f"{base_url}?{encoded_params}"
+        
+        response = requests.get(url)
+        response.raise_for_status() 
+        data = response.json()
+        
+        if data:
+            return data
+        else:
+            print(f"Empty response or invalid JSON: {response.text}")
+            return None
+    
+    except requests.exceptions.RequestException as e:
+        print(f"Error fetching data: {e}")
+        return None
+
+def display_traffic_data(traffic_data):
+    if traffic_data:
+        route = traffic_data.get('routes', [])[0] 
+        
+        if route:
+            print(f"Route from {route['sections'][0]['start']['name']} to {route['sections'][-1]['end']['name']}:")
+            print(f"Estimated Total Travel Time: {route['summary']['travelTimeInSeconds'] // 60} minutes")
+            
+            for section in route['sections']:
+                print("\nSection Details:")
+                print(f"Road Name: {section['roadName']}")
+                if 'currentTraffic' in section:
+                    print(f"Current Traffic Speed: {section['currentTraffic']['speedKMH']} km/h")
+                    print(f"Free Flow Speed: {section['currentTraffic']['freeFlowSpeedKMH']} km/h")
+                    print(f"Traffic Delay: {section['currentTraffic']['delayInSeconds']} seconds")
+                    if section['currentTraffic']['delayInSeconds'] > 0:
+                        print("Traffic congestion detected.")
+                    else:
+                        print("No traffic congestion detected.")
+                else:
+                    print("No traffic data available for this section.")
+                print()
+        else:
+            print("No route data available.")
+    
+    else:
+        print("No data to display.")
+
+if __name__ == "__main__":
+    API_KEY = 'uUYBGWyrApuCmV0fKZzGoc46MtOcON2J'
+    origin_lat = input("Enter origin latitude (e.g., 40.7577): ")
+    origin_lon = input("Enter origin longitude (e.g., -73.9857): ")
+    dest_lat = input("Enter destination latitude (e.g., 40.7850): ")
+    dest_lon = input("Enter destination longitude (e.g., -73.9682): ")
+    
+    traffic_data = fetch_traffic_data(API_KEY, origin_lat, origin_lon, dest_lat, dest_lon)
+    display_traffic_data(traffic_data)
